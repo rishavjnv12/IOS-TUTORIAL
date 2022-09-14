@@ -21,7 +21,7 @@ class LoaderViewCell: UITableViewCell{
     }
     
     func configure() {
-        self.contentView.backgroundColor = .black
+        self.contentView.backgroundColor = .lightGray
         self.contentView.addSubview(spinner)
         spinner.color = .white
         spinner.snp.makeConstraints{make in

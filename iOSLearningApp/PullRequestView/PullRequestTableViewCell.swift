@@ -8,25 +8,51 @@
 import Foundation
 import UIKit
 
-class PullRequestViewCell: UITableViewCell{
-    let container = UIView()
+class PullRequestTableViewCell: UITableViewCell{
+    private let containerView = UIView()
 
-    var profileImage = UIImageView()
-    let userInfoView = UIView()
+    private let profileImageView = UIImageView()
+    private let userInfoView = UIView()
     
-    let titleLabel = UILabel(frame: .zero)
-    let subTitleLabel = UILabel(frame: .zero)
-    let userDesc = UILabel()
+    private let titleLabel = UILabel(frame: .zero)
+    private let subTitleLabel = UILabel(frame: .zero)
+    private let userDesc = UILabel()
     
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.configure()
+        self.configureView()
     }
 
-    func configure() {
-        self.backgroundColor = .black
-        setUpContainer()
+    func setData(item: Item?){
+        profileImageView.image = UIImage(named: "user")
+        URLSession.shared.dataTask(with: NSURL(string: (item?.user?.avatar_url) ?? "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png")! as URL, completionHandler: { (data, response, error) -> Void in
+                if error != nil {
+                    print(error ?? "error")
+                    return
+                }
+                let image = UIImage(data: data!)
+                DispatchQueue.main.async(execute: { () -> Void in
+                    self.profileImageView.image = image
+                })
+            }).resume()
+
+        self.titleLabel.text = item?.user?.login
+        self.subTitleLabel.text = item?.title
+        self.userDesc.text = item?.body
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+// MARK: private methods
+
+private extension PullRequestTableViewCell {
+    func configureView() {
+        self.backgroundColor = .lightGray
+        setUpContainerView()
         setUpProfileImage()
         setUpInfoView()
         setUpTitlLabel()
@@ -34,23 +60,23 @@ class PullRequestViewCell: UITableViewCell{
         setUpUserDesc()
     }
     
-    func setUpContainer(){
-        self.contentView.addSubview(container)
+    func setUpContainerView(){
+        self.contentView.addSubview(containerView)
         
-        container.backgroundColor = .white
-        container.clipsToBounds = true
-        container.layer.cornerRadius = 10
-        container.snp.makeConstraints{make in
+        containerView.backgroundColor = .white
+        containerView.clipsToBounds = true
+        containerView.layer.cornerRadius = 10
+        containerView.snp.makeConstraints{make in
             make.top.left.equalToSuperview().offset(10)
             make.bottom.right.equalToSuperview().offset(-10)
         }
     }
     
     func setUpProfileImage() {
-        self.container.addSubview(profileImage)
-        profileImage.clipsToBounds = true
-        profileImage.layer.cornerRadius = 50
-        profileImage.snp.makeConstraints{make in
+        self.containerView.addSubview(profileImageView)
+        profileImageView.clipsToBounds = true
+        profileImageView.layer.cornerRadius = 50
+        profileImageView.snp.makeConstraints{make in
             make.left.equalToSuperview().offset(10)
             make.height.width.equalTo(100.0)
             make.centerY.equalToSuperview()
@@ -58,12 +84,12 @@ class PullRequestViewCell: UITableViewCell{
     }
     
     func setUpInfoView() {
-        self.container.addSubview(userInfoView)
+        self.containerView.addSubview(userInfoView)
         userInfoView.snp.makeConstraints{make in
             make.top.equalToSuperview()
             make.right.equalToSuperview()
             make.bottom.equalToSuperview()
-            make.left.equalTo(profileImage.snp.right)
+            make.left.equalTo(profileImageView.snp.right)
         }
     }
     
@@ -97,30 +123,7 @@ class PullRequestViewCell: UITableViewCell{
             make.left.equalToSuperview().offset(10)
             make.right.equalToSuperview().offset(-10)
             make.bottom.equalToSuperview().offset(-10)
-            make.height.greaterThanOrEqualTo(profileImage.snp.height)
+            make.height.greaterThanOrEqualTo(profileImageView.snp.height)
         }
-    }
-    
-
-    func setData(item: Item?){
-        profileImage.image = UIImage(named: "user")
-        URLSession.shared.dataTask(with: NSURL(string: (item?.user?.avatar_url) ?? "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png")! as URL, completionHandler: { (data, response, error) -> Void in
-                if error != nil {
-                    print(error ?? "error")
-                    return
-                }
-                let image = UIImage(data: data!)
-                DispatchQueue.main.async(execute: { () -> Void in
-                    self.profileImage.image = image
-                })
-            }).resume()
-
-        self.titleLabel.text = item?.user?.login
-        self.subTitleLabel.text = item?.title
-        self.userDesc.text = item?.body
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }

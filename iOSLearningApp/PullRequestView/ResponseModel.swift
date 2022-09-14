@@ -12,7 +12,7 @@ struct Response: Decodable{
 }
 
 struct Item: Decodable {
-    var id:Int64?
+    var id:Int?
     var title: String?
     var user:User?
     var body:String?
@@ -20,7 +20,7 @@ struct Item: Decodable {
 
 struct User: Decodable {
     var type:String?
-    var id:Int64?
+    var id:Int?
     var login:String?
     var avatar_url:String?
 }
