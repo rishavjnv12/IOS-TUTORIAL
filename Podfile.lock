@@ -1,0 +1,21 @@
+PODS:
+  - NVDBManager (1.0.0)
+  - NVNetworking (1.0.0)
+
+DEPENDENCIES:
+  - NVDBManager (from `NVDBManager/`)
+  - NVNetworking (from `NVNetworking/`)
+
+EXTERNAL SOURCES:
+  NVDBManager:
+    :path: NVDBManager/
+  NVNetworking:
+    :path: NVNetworking/
+
+SPEC CHECKSUMS:
+  NVDBManager: b704f2b222d5f0ec353072473a5e6129bbb2874f
+  NVNetworking: 9761c8bd1560c7556d5a79ab268c3a6479dc2b32
+
+PODFILE CHECKSUM: ddec6ae0f725b505a743cad1a0bd69023e9e72a6
+
+COCOAPODS: 1.11.3

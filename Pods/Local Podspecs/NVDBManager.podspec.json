@@ -1,0 +1,27 @@
+{
+  "name": "NVDBManager",
+  "version": "1.0.0",
+  "summary": "A DB manager",
+  "description": "uses url request",
+  "homepage": "http://EXAMPLE/NaviThirdPartyCommons",
+  "authors": {
+    "Rishav Kumar": "rishav.kumar@navi.com"
+  },
+  "platforms": {
+    "ios": "15.5"
+  },
+  "source": {
+    "git": "http://www.github.com/NaviThirdPartyCommons.git",
+    "tag": "1.0.0"
+  },
+  "static_framework": false,
+  "ios": {
+    "vendored_frameworks": "Frameworks/HyperSnapSDK.xcframework",
+    "resources": "Frameworks/HVResources.bundle"
+  },
+  "source_files": [
+    "NVDBManager",
+    "NVDBManager/**/*.{swift,xib}"
+  ],
+  "exclude_files": "Classes/Exclude"
+}

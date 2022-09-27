@@ -21,11 +21,11 @@ class LoaderViewCell: UITableViewCell{
     }
     
     func configure() {
-        self.contentView.backgroundColor = .lightGray
+        self.contentView.backgroundColor = .Theme.primary
         self.contentView.addSubview(spinner)
-        spinner.color = .white
+        spinner.color = .black
         spinner.snp.makeConstraints{make in
-            make.top.bottom.left.right.equalToSuperview().offset(10)
+            make.top.bottom.left.right.equalToSuperview().offset(SizeContsants.boundaryMargin)
         }
     }
 }

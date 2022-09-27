@@ -4,32 +4,29 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>SnapKitPlayground (Playground) 1.xcscheme</key>
+		<key>NVDBManager.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>0</integer>
 		</dict>
-		<key>SnapKitPlayground (Playground) 2.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-			<key>orderHint</key>
-			<integer>3</integer>
-		</dict>
-		<key>SnapKitPlayground (Playground).xcscheme</key>
+		<key>NVNetworking.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
-		<key>iOSLearningApp.xcscheme_^#shared#^_</key>
+		<key>Pods-iOSLearningApp.xcscheme</key>
 		<dict>
+			<key>isShown</key>
+			<false/>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>2</integer>
 		</dict>
 	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict/>
 </dict>
 </plist>

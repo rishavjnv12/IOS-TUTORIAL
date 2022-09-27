@@ -1,0 +1,6 @@
+framework module NVDBManager {
+  umbrella header "NVDBManager-umbrella.h"
+
+  export *
+  module * { export * }
+}

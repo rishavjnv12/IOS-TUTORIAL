@@ -10,15 +10,14 @@ import SnapKit
 
 
 class PullRequestViewController: UIViewController {
-    let tableView = UITableView()
-    let titleLabel = UILabel()
+    // MARK: private properties
+    private let tableView = UITableView()
+    private let loadingView = LoaderView()
+    private let notificationCenter = NotificationCenter.default
+    private var endOfData = false
+    private let viewModel = PullRequestViewModel()
     
-    private let spinner = UIActivityIndicatorView()
-    private let loadingLabel = UILabel()
-    private let loadingView = UIView()
-    
-    var viewModel = PullRequestViewModel()
-    
+    // MARK: public methods
     init() {
         super.init(nibName: nil, bundle: nil)
     }
@@ -30,59 +29,62 @@ class PullRequestViewController: UIViewController {
     func showTableView() {
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.backgroundColor = .lightGray
+        tableView.backgroundColor = .Theme.primary
         tableView.separatorStyle = UITableViewCell.SeparatorStyle.none
-        tableView.allowsSelection = false
         
-        tableView.register(PullRequestTableViewCell.self, forCellReuseIdentifier: "PullRequestViewCell")
-        tableView.register(LoaderViewCell.self, forCellReuseIdentifier: "LoaderViewCell")
+        tableView.register(PullRequestTableViewCell.self, forCellReuseIdentifier: PullRequestTableViewCell.description())
+        tableView.register(LoaderViewCell.self, forCellReuseIdentifier: LoaderViewCell.description())
         
         view.addSubview(tableView)
         tableView.snp.makeConstraints{make in
-            make.top.equalTo(titleLabel.snp.bottom)
-            make.leading.trailing.bottom.equalToSuperview()
+            make.top.leading.trailing.bottom.equalToSuperview()
         }
     }
-    
-    func configure() {        
-        titleLabel.text = .Constants.users.rawValue
-        titleLabel.textColor = .white
-        titleLabel.textAlignment = .center
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(titleLabel)
-        
-        titleLabel.snp.makeConstraints{make in
-            make.leading.equalToSuperview().offset(16)
-            make.trailing.equalToSuperview().offset(-16)
-            make.top.equalToSuperview().offset(50)
-        }
-    }
-    
-    
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.delegate = self
-        self.configure()
+        self.title = .Label.users.rawValue
         viewModel.viewLoaded()
     }
 }
 
-
+// MARK: PullRequestViewController extension
 extension PullRequestViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return (self.viewModel.sampleResponse.items?.count ?? 0) + 1
+        guard let tableSize = self.viewModel.sampleResponse.items?.count else {
+            return 1
+        }
+        return tableSize + (viewModel.endOfData ? 0 : 1)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if(indexPath.row < self.viewModel.sampleResponse.items?.count ?? 0){
-            let cell = tableView.dequeueReusableCell(withIdentifier: "PullRequestViewCell") as! PullRequestTableViewCell
+        guard let tableSize = self.viewModel.sampleResponse.items?.count else {
+            return UITableViewCell()
+        }
+        
+        if indexPath.row < tableSize,
+            let cell = tableView.dequeueReusableCell(withIdentifier: PullRequestTableViewCell.description()) as? PullRequestTableViewCell {
             let item = self.viewModel.sampleResponse.items?[indexPath.row]
+            guard let userName = self.viewModel.sampleResponse.items?[indexPath.row].user?.login else {
+                return cell
+            }
+            cell.buttonTappedCallback = { [weak self] in
+                self?.viewModel.toggleFavouriteState(userName)
+            }
             cell.setData(item: item)
+            
+            viewModel.mapUser(userName: userName, indexPath: indexPath)
+            if viewModel.isFavourite(userName: userName){
+                cell.setFavouriteState()
+            } else {
+                cell.setUnFavouriteState()
+            }
             return cell
         } else {
-            let loader = tableView.dequeueReusableCell(withIdentifier: "LoaderViewCell") as! LoaderViewCell
+            guard let loader = tableView.dequeueReusableCell(withIdentifier: LoaderViewCell.description()) as? LoaderViewCell else {
+                return UITableViewCell()
+            }
             loader.spinner.startAnimating()
             return loader
         }
@@ -90,65 +92,66 @@ extension PullRequestViewController: UITableViewDataSource, UITableViewDelegate{
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
-            tableView.deselectRow(at: indexPath, animated: true)
+        guard let username = self.viewModel.sampleResponse.items?[indexPath.row].user?.login else {
+            return
         }
+        
+        let userDetailViewController = UserDetailViewController(userName: username)
+        
+        let reloadTable:(Notification)->Void = {make in
+            tableView.reloadData()
+        }
+        notificationCenter.addObserver(forName: NSNotification.Name("observer"), object: nil, queue: nil, using: reloadTable)
+        self.navigationController?.pushViewController(userDetailViewController, animated: true)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if(indexPath.row == (self.viewModel.sampleResponse.items?.count)! - 2){
-            viewModel.fetchData()
+        if !viewModel.endOfData {
+            viewModel.reachedAt(indexPath)
         }
     }
 }
 
 extension PullRequestViewController: PullRequestViewControllerProtocol {
+    // MARK: public methods
     func initialDataLoaded() {
         self.hideLoader()
         self.showTableView()
     }
     
-    func nextPageLoaded() {
-        self.tableView.reloadData()
-    }
-    
     func failedToload() {
-        print("Inside error handler")
+        print(String.Error.errorMsg.rawValue)
     }
     
     func showLoader() {
+        view.backgroundColor = .Theme.primary
         view.addSubview(loadingView)
         
-        loadingView.backgroundColor = .lightGray
+        loadingView.backgroundColor = .Theme.primary
         loadingView.snp.makeConstraints{make in
-            make.top.left.bottom.right.equalToSuperview()
+            make.centerX.centerY.equalToSuperview()
         }
-        loadingLabel.text = .Constants.loading.rawValue
-        loadingView.addSubview(loadingLabel)
-        loadingView.addSubview(spinner)
-        spinner.snp.makeConstraints{make in
-            make.top.bottom.equalToSuperview()
-            make.left.equalToSuperview().offset(150)
-        }
-        loadingLabel.snp.makeConstraints{make in
-            make.top.bottom.right.equalToSuperview()
-            make.left.equalTo(spinner.snp.right)
-        }
-        spinner.startAnimating()
     }
     
     func hideLoader() {
-        spinner.stopAnimating()
         loadingView.isHidden = true
         loadingView.removeFromSuperview()
+    }
+    
+    func reloadTable() {
+        tableView.reloadData()
+    }
+    
+    func reloadCells(indices: [IndexPath]) {
+        tableView.reloadRows(at: indices, with: .none)
     }
 }
 
 protocol PullRequestViewControllerProtocol: AnyObject {
     func initialDataLoaded()
-    func nextPageLoaded()
     func failedToload()
     func showLoader()
     func hideLoader()
+    func reloadTable()
+    func reloadCells(indices:[IndexPath])
 }
-
